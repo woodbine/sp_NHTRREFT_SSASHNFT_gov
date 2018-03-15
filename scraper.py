@@ -97,22 +97,22 @@ soup = BeautifulSoup(html, 'lxml')
 
 #### SCRAPE DATA
 import itertools
-for page in itertools.count(0, 20):
+for page in itertools.count(0, 40):
     html = urllib2.urlopen(urls.format(page))
     soup = BeautifulSoup(html, 'lxml')
-    blocks = soup.find('table', 'table table-striped docman-table-documents').find('tbody').find_all('tr')
+    blocks = soup.find('table', attrs={'class', re.compile("table table-striped koowa_table")}).find_all('span', 'whitespace_preserver')
     for block in blocks:
-            link = 'http://sesandspccg.nhs.uk'+block.find('td').find('a')['href']+'/file'
-            title = block.find('td').find('a')['data-title'].strip()
-            csvMth = title.split()[1][:3]
-            csvYr = title[-4:]
-            csvMth = convert_mth_strings(csvMth.upper())
-            data.append([csvYr, csvMth, link])
+        link = 'https://sesandspccg.nhs.uk'+block.find('a')['href']+'/file'
+        title = block.find('a').text.strip().replace('25K ', '').replace('25K ', '').replace('25k ', '').replace('Expenditure over 25K', '').replace('EXPENDITURE OVER 25K ', '').replace('Expenditure over 05Q SESSP', '').strip()
+        csvMth = title.split()[-2][:3]
+        csvYr = title.split()[-1]
+        csvMth = convert_mth_strings(csvMth.upper())
+        data.append([csvYr, csvMth, link])
     try:
-        next = soup.find('ul', 'pagination-list').find_all('a')[-1].text
+        next = soup.find('ul', 'k-pagination__pages').find_all('a')[-1].text
     except:
         break
-    if u'→' not in next:
+    if u'»' not in next:
             break
 
 
